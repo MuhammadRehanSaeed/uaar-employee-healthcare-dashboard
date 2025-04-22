@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 // Mock data
 const initialDoctors = [
@@ -34,9 +34,7 @@ const DoctorsSection = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Doctors Management</h2>
-        <Button className="flex items-center gap-1">
-          <Plus className="h-4 w-4" /> Add Doctor
-        </Button>
+        {/* Removed Add Doctor button */}
       </div>
       
       <div className="relative">
