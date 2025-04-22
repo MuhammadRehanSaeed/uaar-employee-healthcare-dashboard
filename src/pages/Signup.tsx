@@ -6,18 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { UserPlus } from "lucide-react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/firebase";
+import { toast } from "@/components/ui/sonner";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would validate and register the user here
-    navigate("/dashboard");
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      if (auth.currentUser && name) {
+        await updateProfile(auth.currentUser, { displayName: name });
+      }
+      toast.success("Account created successfully");
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.message || "Signup failed");
+    }
+    setLoading(false);
   };
 
   return (
@@ -77,7 +95,9 @@ const Signup = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">Sign Up</Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing Up..." : "Sign Up"}
+            </Button>
           </form>
           <div className="mt-4 text-center">
             <p>Already have an account? <Link to="/" className="text-primary font-medium">Sign In</Link></p>

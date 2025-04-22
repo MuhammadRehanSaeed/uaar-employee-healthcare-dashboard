@@ -7,16 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { User } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would validate and authenticate here
-    navigate("/dashboard");
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Signed in successfully");
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.message || "Login failed");
+    }
+    setLoading(false);
   };
 
   return (
@@ -55,7 +66,9 @@ const Index = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">Sign In</Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
+            </Button>
           </form>
           <div className="mt-4 text-center">
             <p>Don't have an account? <Link to="/signup" className="text-primary font-medium">Sign Up</Link></p>
