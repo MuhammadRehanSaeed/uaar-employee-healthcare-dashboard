@@ -1,21 +1,22 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { User } from "lucide-react";
+import { UserPlus } from "lucide-react";
 
-const Index = () => {
+const Signup = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would validate and authenticate here
+    // In a real app, you would validate and register the user here
     navigate("/dashboard");
   };
 
@@ -25,14 +26,24 @@ const Index = () => {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
             <div className="rounded-full bg-primary p-4 text-white">
-              <User size={32} />
+              <UserPlus size={32} />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">UAAR Healthcare Admin</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
+          <CardDescription>Sign up for UAAR Healthcare Admin</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input 
+                id="name" 
+                placeholder="Full Name" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
@@ -55,10 +66,21 @@ const Index = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">Sign In</Button>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input 
+                id="confirmPassword" 
+                type="password" 
+                placeholder="Confirm Password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">Sign Up</Button>
           </form>
           <div className="mt-4 text-center">
-            <p>Don't have an account? <Link to="/signup" className="text-primary font-medium">Sign Up</Link></p>
+            <p>Already have an account? <Link to="/" className="text-primary font-medium">Sign In</Link></p>
           </div>
         </CardContent>
       </Card>
@@ -66,4 +88,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Signup;
