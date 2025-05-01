@@ -2,6 +2,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import { Pill } from "lucide-react";
+import { Microscope } from 'lucide-react';
+import { Hospital } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { 
   User, 
@@ -54,6 +58,26 @@ const Sidebar = () => {
       title: "Digital Slip",
       href: "/dashboard/digital-slip",
       icon: <Printer className="mr-2 h-5 w-5" />,
+    },
+    {
+      title: "Medical Slip",
+      href: "/dashboard/medical-slip",
+      icon: <FileText className="mr-2 h-5 w-5" />,
+    },
+    {
+      title: "Medical Inventory",
+      href: "/dashboard/medical-inventory",
+      icon: <Pill className="mr-2 h-5 w-5" />,
+    },
+    {
+      title: "Labs",
+      href: "/dashboard/medical-labs",
+      icon: <Microscope className="mr-2 h-5 w-5" />,
+    },
+    {
+      title: "Hospitals",
+      href: "/dashboard/medical-hospitals",
+      icon: <Hospital className="mr-2 h-5 w-5" />,
     },
   ];
 

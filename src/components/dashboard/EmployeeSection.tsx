@@ -1,53 +1,91 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-
-// Mock data
-const initialEmployees = [
-  { id: 1, name: "James Wilson", position: "Nurse", department: "Emergency", joiningDate: "2022-05-15" },
-  { id: 2, name: "Linda Martinez", position: "Administrative Assistant", department: "Reception", joiningDate: "2021-10-22" },
-  { id: 3, name: "Richard Thompson", position: "Lab Technician", department: "Laboratory", joiningDate: "2020-03-10" },
-  { id: 4, name: "Susan Garcia", position: "Pharmacist", department: "Pharmacy", joiningDate: "2023-01-05" },
-  { id: 5, name: "Thomas Anderson", position: "IT Specialist", department: "IT", joiningDate: "2022-08-17" },
-];
+import { db } from "../../firebase"; // Adjust if your firebase file is elsewhere
+import { collection, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 const EmployeeSection = () => {
-  const [employees, setEmployees] = useState(initialEmployees);
+  const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredEmployees = employees.filter(employee => 
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch employees
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "employees"));
+        const data = snapshot.docs.map(doc => ({
+          docId: doc.id,
+          ...doc.data(),
+        }));
+        setEmployees(data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
 
-  // Format date function
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(date);
+    fetchEmployees();
+  }, []);
+
+  // Handle delete
+  const handleDelete = async (docId: string) => {
+    try {
+      await deleteDoc(doc(db, "employees", docId));
+      setEmployees(prev => prev.filter(emp => emp.docId !== docId));
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+    }
   };
+
+  // Handle update for all fields
+  const handleEdit = async (employee: any) => {
+    // Prompt for each field to be updated
+    const newName = prompt("Enter new name:", employee.name);
+    const newDesignation = prompt("Enter new designation:", employee.designation);
+    const newEmail = prompt("Enter new email:", employee.email);
+    const newEmployeeId = prompt("Enter new employee ID:", employee.employeeId);
+
+    if (newName && newDesignation && newEmail && newEmployeeId) {
+      try {
+        // Update the Firestore document with the new values
+        await updateDoc(doc(db, "employees", employee.docId), { 
+          name: newName,
+          designation: newDesignation,
+          email: newEmail,
+          employeeId: newEmployeeId,
+        });
+        
+        // Update the state to reflect changes
+        setEmployees(prev =>
+          prev.map(emp => 
+            emp.docId === employee.docId 
+              ? { ...emp, name: newName, designation: newDesignation, email: newEmail, employeeId: newEmployeeId }
+              : emp
+          )
+        );
+      } catch (error) {
+        console.error("Error updating employee:", error);
+      }
+    } else {
+      alert("All fields must be filled out to update.");
+    }
+  };
+
+  const filteredEmployees = employees.filter(emp =>
+    emp.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.designation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.employeeId?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Employee Management</h2>
-        {/* Removed Add Employee button */}
       </div>
-      
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input 
@@ -64,24 +102,24 @@ const EmployeeSection = () => {
             <TableRow>
               <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Position</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Joining Date</TableHead>
+              <TableHead>Designation</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Employee ID</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredEmployees.length > 0 ? (
-              filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell>{employee.id}</TableCell>
-                  <TableCell className="font-medium">{employee.name}</TableCell>
-                  <TableCell>{employee.position}</TableCell>
-                  <TableCell>{employee.department}</TableCell>
-                  <TableCell>{formatDate(employee.joiningDate)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">Edit</Button>
-                    <Button variant="ghost" size="sm" className="text-red-500">Delete</Button>
+              filteredEmployees.map((emp: any) => (
+                <TableRow key={emp.docId}>
+                  <TableCell>{emp.id}</TableCell>
+                  <TableCell className="font-medium">{emp.name}</TableCell>
+                  <TableCell>{emp.designation}</TableCell>
+                  <TableCell>{emp.email}</TableCell>
+                  <TableCell>{emp.employeeId}</TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(emp)}>Edit</Button>
+                    <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(emp.docId)}>Delete</Button>
                   </TableCell>
                 </TableRow>
               ))

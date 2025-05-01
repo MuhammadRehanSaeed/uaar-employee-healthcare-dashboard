@@ -7,6 +7,10 @@ import DoctorsSection from "@/components/dashboard/DoctorsSection";
 import EmployeeSection from "@/components/dashboard/EmployeeSection";
 import ExternalDoctorsSection from "@/components/dashboard/ExternalDoctorsSection";
 import DigitalSlipSection from "@/components/dashboard/DigitalSlipSection";
+import AllMedicalSlips from "@/components/dashboard/medicalslip";
+import MedicalInventory from "@/components/dashboard/medicalinventory";
+import LabsSection from "@/components/dashboard/lab";
+import HospitalsSection from "@/components/dashboard/hospitals";
 
 const Dashboard = () => {
   const { section } = useParams();
@@ -32,6 +36,15 @@ const Dashboard = () => {
         return <ExternalDoctorsSection />;
       case "digital-slip":
         return <DigitalSlipSection />;
+      case "medical-slip":
+        return <AllMedicalSlips />;
+      case "medical-inventory":
+          return <MedicalInventory/>;
+      case "medical-labs":
+            return <LabsSection/>;
+      case "medical-hospitals":
+            return <HospitalsSection/>;
+      
       default:
         return <StudentsSection />;
     }

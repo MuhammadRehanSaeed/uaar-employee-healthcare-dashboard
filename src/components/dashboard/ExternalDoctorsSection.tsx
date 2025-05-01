@@ -1,16 +1,15 @@
-
-import { useState } from "react";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   Card,
   CardContent,
   CardDescription,
@@ -20,17 +19,11 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Plus, Search, UserMinus, UserPlus } from "lucide-react";
-
-// Mock data
-const initialExternalDoctors = [
-  { id: 1, name: "Dr. James Miller", specialization: "Oncology", hospital: "City Hospital", contactNumber: "+1-555-123-4567" },
-  { id: 2, name: "Dr. Patricia Clark", specialization: "Psychiatry", hospital: "Mental Health Institute", contactNumber: "+1-555-234-5678" },
-  { id: 3, name: "Dr. John Rodriguez", specialization: "Gastroenterology", hospital: "General Hospital", contactNumber: "+1-555-345-6789" },
-  { id: 4, name: "Dr. Elizabeth Taylor", specialization: "Endocrinology", hospital: "Diabetes Center", contactNumber: "+1-555-456-7890" },
-];
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const ExternalDoctorsSection = () => {
-  const [externalDoctors, setExternalDoctors] = useState(initialExternalDoctors);
+  const [externalDoctors, setExternalDoctors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDoctor, setNewDoctor] = useState({
@@ -40,33 +33,60 @@ const ExternalDoctorsSection = () => {
     contactNumber: ""
   });
 
-  const filteredDoctors = externalDoctors.filter(doctor => 
-    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.hospital.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch external doctors from Firestore
+  const fetchExternalDoctors = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "externalDoctors"));
+      const doctorsData = querySnapshot.docs.map(docSnap => ({
+        firestoreId: docSnap.id,
+        ...docSnap.data()
+      }));
+      setExternalDoctors(doctorsData);
+    } catch (error) {
+      console.error("Error fetching external doctors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchExternalDoctors();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewDoctor(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddDoctor = () => {
-    // In a real app, you would validate and add to database
-    const newId = externalDoctors.length > 0 ? Math.max(...externalDoctors.map(d => d.id)) + 1 : 1;
-    const doctorToAdd = {
-      id: newId,
-      ...newDoctor
-    };
-    
-    setExternalDoctors([...externalDoctors, doctorToAdd]);
-    setNewDoctor({ name: "", specialization: "", hospital: "", contactNumber: "" });
-    setShowAddForm(false);
+  const handleAddDoctor = async () => {
+    const { name, specialization, hospital, contactNumber } = newDoctor;
+    if (!name || !specialization || !hospital || !contactNumber) {
+      alert("All fields are required.");
+      return;
+    }
+
+    try {
+      const docRef = await addDoc(collection(db, "externalDoctors"), newDoctor);
+      setExternalDoctors([...externalDoctors, { firestoreId: docRef.id, ...newDoctor }]);
+      setNewDoctor({ name: "", specialization: "", hospital: "", contactNumber: "" });
+      setShowAddForm(false);
+    } catch (error) {
+      console.error("Error adding external doctor:", error);
+    }
   };
 
-  const handleRemoveDoctor = (id: number) => {
-    setExternalDoctors(externalDoctors.filter(doctor => doctor.id !== id));
+  const handleRemoveDoctor = async (firestoreId: string) => {
+    try {
+      await deleteDoc(doc(db, "externalDoctors", firestoreId));
+      setExternalDoctors(externalDoctors.filter(doctor => doctor.firestoreId !== firestoreId));
+    } catch (error) {
+      console.error("Error deleting external doctor:", error);
+    }
   };
+
+  const filteredDoctors = externalDoctors.filter(doctor =>
+    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doctor.hospital.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
@@ -80,7 +100,7 @@ const ExternalDoctorsSection = () => {
           {showAddForm ? "Cancel" : "Add External Doctor"}
         </Button>
       </div>
-      
+
       {showAddForm && (
         <Card>
           <CardHeader>
@@ -151,7 +171,6 @@ const ExternalDoctorsSection = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Specialization</TableHead>
               <TableHead>Hospital/Clinic</TableHead>
@@ -162,8 +181,7 @@ const ExternalDoctorsSection = () => {
           <TableBody>
             {filteredDoctors.length > 0 ? (
               filteredDoctors.map((doctor) => (
-                <TableRow key={doctor.id}>
-                  <TableCell>{doctor.id}</TableCell>
+                <TableRow key={doctor.firestoreId}>
                   <TableCell className="font-medium">{doctor.name}</TableCell>
                   <TableCell>{doctor.specialization}</TableCell>
                   <TableCell>{doctor.hospital}</TableCell>
@@ -174,7 +192,7 @@ const ExternalDoctorsSection = () => {
                       variant="ghost" 
                       size="sm" 
                       className="text-red-500"
-                      onClick={() => handleRemoveDoctor(doctor.id)}
+                      onClick={() => handleRemoveDoctor(doctor.firestoreId)}
                     >
                       Remove
                     </Button>
@@ -183,7 +201,7 @@ const ExternalDoctorsSection = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
+                <TableCell colSpan={5} className="text-center py-4">
                   No external doctors found
                 </TableCell>
               </TableRow>
