@@ -1,39 +1,30 @@
+🏥 UAAR Employee Healthcare System – Admin Dashboard
+📌 Overview
 
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+The UAAR Employee Healthcare System Dashboard is a web-based admin panel built with TypeScript. It serves as the central management system for handling healthcare-related data and services for employees, students, and doctors at UAAR.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+The dashboard allows administrators to manage medical records, external panels, medicine inventory, and digital medical slips, making healthcare processes more transparent and efficient.
 
-# Step 3: Install the necessary dependencies.
-npm i
+⚙️ Tech Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+TypeScript – Strongly typed JavaScript for scalability and maintainability
 
-**Edit a file directly in GitHub**
+CSS 
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Firebase Firestore (integrated with the mobile app)
 
-**Use GitHub Codespaces**
+Deployment – Vercel 
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+🚀 Features
 
-## What technologies are used for this project?
+👨‍⚕️ Manage doctors, employees, and students records (add, update, delete, view)
 
-This project is built with:
+🏥 Add and manage external medical panels
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+📄 Generate, view, and update digital medical slips
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+💊 Maintain medicine inventory with stock updates
+
+📊 Admin dashboard with an organized view of healthcare data
+
+⚡ Built with TypeScript for reliable and scalable development
